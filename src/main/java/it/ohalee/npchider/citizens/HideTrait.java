@@ -1,4 +1,4 @@
-package it.ohalee.npchider;
+package it.ohalee.npchider.citizens;
 
 import net.citizensnpcs.api.persistence.Persist;
 import net.citizensnpcs.api.trait.Trait;
