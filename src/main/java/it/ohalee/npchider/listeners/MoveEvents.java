@@ -1,71 +1,99 @@
 package it.ohalee.npchider.listeners;
 
 import it.ohalee.npchider.NPCHider;
-import it.ohalee.npchider.citizens.HideTrait;
-import net.citizensnpcs.api.CitizensAPI;
-import net.citizensnpcs.api.npc.NPC;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
+import org.bukkit.event.player.PlayerTeleportEvent;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 
 public class MoveEvents implements Listener {
 
     private final NPCHider plugin;
-    private final double distance = 2.5;
-    private final double radius = 2.0;
 
     public MoveEvents(NPCHider plugin) {
         this.plugin = plugin;
     }
 
-    @EventHandler
-    public void onMove(PlayerMoveEvent e) {
-        Player player = e.getPlayer();
+    private void playerCheck(Player player, Location location) {
+        UUID uniqueId = player.getUniqueId();
 
-        for (Entity en : player.getNearbyEntities(this.radius, this.radius, this.radius)) {
-            if (CitizensAPI.getNPCRegistry().isNPC(en)) {
-                NPC npc = CitizensAPI.getNPCRegistry().getNPC(en);
-                if (npc.hasTrait(HideTrait.class)) {
-                    if (player.getLocation().distance(npc.getStoredLocation()) >= this.distance) {
-                        // Diventa Visibile
+        if (this.plugin.getRegion().isInRegion(location)) {
+            // Nella region -> sta entrando
 
-                        for (Entity pass : player.getPassengers()) {
-                            if (pass.getType() == EntityType.PLAYER) {
-                                player.removePassenger(pass);
-                            }
-                        }
+            // Non è nascosto quindi lo nascondiamo
+            if (!this.plugin.getInZone().contains(uniqueId)) {
+                this.plugin.getInZone().add(uniqueId);
 
-                        player.removePotionEffect(PotionEffectType.INVISIBILITY);
+                if (Bukkit.getPluginManager().getPlugin("ProCosmetics") != null) {
+                    se.file14.procosmetics.api.ProCosmeticsAPI.getUser(player).unequipCosmetics(true);
+                }
 
-                        // TODO: 24/01/2022 Attivare gadgets
+                // Hide
+                for (Player online : Bukkit.getOnlinePlayers()) {
+                    if (online != player) {
+                        online.hidePlayer(this.plugin, player);
                     }
-                    else {
-                        // Diventa Invisibile
+                }
+            }
+        } else {
+            // Fuori dalla region -> sta uscendo
 
-                        for (Entity pass : player.getPassengers()) {
-                            if (pass.getType() == EntityType.PLAYER) {
-                                player.removePassenger(pass);
-                            }
-                        }
+            // E' nascosto quindi lo rendiamo visibile
+            if (this.plugin.getInZone().contains(uniqueId)) {
+                this.plugin.getInZone().remove(uniqueId);
 
-                        player.setCollidable(false);
-                        player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 6000, 0, false, false));
+                if (Bukkit.getPluginManager().getPlugin("ProCosmetics") != null) {
+                    se.file14.procosmetics.api.ProCosmeticsAPI.getUser(player).equipLastCosmetics(true);
+                }
 
-                        // TODO: 24/01/2022 Disattivare gadgets
+                // Show
+                for (Player online : Bukkit.getOnlinePlayers()) {
+                    if (online != player) {
+                        online.showPlayer(this.plugin, player);
                     }
                 }
             }
         }
+    }
+
+    @EventHandler
+    public void onMove(PlayerMoveEvent e) {
+        Player player = e.getPlayer();
+        this.playerCheck(player, e.getTo());
+    }
+
+    @EventHandler
+    public void onTeleport(PlayerTeleportEvent e) {
+        Player player = e.getPlayer();
+        this.playerCheck(player, e.getTo());
+    }
+
+    @EventHandler
+    public void onJoin(PlayerJoinEvent e) {
+        Player player = e.getPlayer();
+
+        // Nascondo tutti i player che sono nella zona a chi entra
+        for (UUID uniqueId : this.plugin.getInZone()) {
+            Player inZone = Bukkit.getPlayer(uniqueId);
+            if (inZone != null) {
+                player.hidePlayer(this.plugin, inZone);
+            }
+        }
+    }
+
+    @EventHandler
+    public void onLeave(PlayerQuitEvent e) {
+        Player player = e.getPlayer();
+        this.plugin.getInZone().remove(player.getUniqueId());
     }
 
 }
