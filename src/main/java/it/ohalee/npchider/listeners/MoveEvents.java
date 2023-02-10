@@ -24,6 +24,10 @@ public class MoveEvents implements Listener {
     }
 
     private void playerCheck(Player player, Location location) {
+        if (player.hasMetadata("NPC")) {
+            return;
+        }
+
         UUID uniqueId = player.getUniqueId();
 
         if (this.plugin.getRegion().isInRegion(location)) {
@@ -34,7 +38,7 @@ public class MoveEvents implements Listener {
                 this.plugin.getInZone().add(uniqueId);
 
                 if (Bukkit.getPluginManager().getPlugin("ProCosmetics") != null) {
-                    se.file14.procosmetics.api.ProCosmeticsAPI.getUser(player).unequipCosmetics(true);
+                    se.file14.procosmetics.api.ProCosmeticsProvider.get().getUserManager().getUser(player).unequipCosmetics(true);
                 }
 
                 // Hide
@@ -52,7 +56,7 @@ public class MoveEvents implements Listener {
                 this.plugin.getInZone().remove(uniqueId);
 
                 if (Bukkit.getPluginManager().getPlugin("ProCosmetics") != null) {
-                    se.file14.procosmetics.api.ProCosmeticsAPI.getUser(player).equipLastCosmetics(true);
+                    se.file14.procosmetics.api.ProCosmeticsProvider.get().getUserManager().getUser(player).equipLastCosmetics(true);
                 }
 
                 // Show
