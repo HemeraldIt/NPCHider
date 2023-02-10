@@ -11,8 +11,6 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 
 public class MoveEvents implements Listener {

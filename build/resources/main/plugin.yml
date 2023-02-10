@@ -1,0 +1,6 @@
+name: NPCHider
+version: ${project.version}
+main: it.ohalee.npchider.NPCHider
+api-version: 1.16
+authors: [ ohAlee ]
+depend: [ Citizens ]

@@ -19,8 +19,14 @@ public final class NPCHider extends JavaPlugin {
     @Override
     public void onEnable() {
         World w = Bukkit.getWorlds().get(0);
-        Location pos1 = new Location(w, 24, 64, 13);
-        Location pos2 = new Location(w, 32, 54, -6);
+
+        // BEDWARS
+        //Location pos1 = new Location(w, 24, 64, 13);
+        //Location pos2 = new Location(w, 32, 54, -6);
+
+        // THE BRIDGE
+        Location pos1 = new Location(w, 3, 66, 13);
+        Location pos2 = new Location(w, -6, 71, -13);
 
         this.region = new Region(pos1, pos2);
 
